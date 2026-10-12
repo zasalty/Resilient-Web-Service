@@ -1,0 +1,202 @@
+# Project Setup & Presentation Guide
+
+This guide explains how to download Docker, run our project, and test the load balancing and automatic failover features.
+
+The goal is to make it easy for everyone in the group to run the project on their own computer and demonstrate it during our presentation.
+
+## 1. Installing Docker Desktop
+
+Before running the project, you'll need Docker Desktop installed.
+
+1. Go to https://www.docker.com/products/docker-desktop/
+2. Download Docker Desktop for your operating system.
+3. Run the installer and follow the instructions.
+4. If you're on Windows, use the WSL 2 option if prompted.
+5. Restart your computer if required.
+6. Open Docker Desktop and wait for the Docker engine to start.
+
+## 2. Downloading Our Project
+
+1. Open our GitHub repository.
+2. Click the green **Code** button.
+3. Select **Download ZIP**.
+4. Extract the ZIP file somewhere on your computer.
+5. Open the extracted project folder.
+
+Make sure you're working inside the folder containing `docker-compose.yml`.
+
+## 3. Starting the Project
+
+Before starting, make sure Docker Desktop is open and running.
+
+**Option 1 — Easy Method**
+
+Double-click:
+
+`Start-Project.bat`
+
+This should automatically build and start our web servers and load balancer, then open the website in your browser.
+
+**Option 2 — Using the Terminal**
+
+Open PowerShell in the project folder and run:
+
+powershell
+  docker compose up -d --build
+
+
+Once everything starts, open:
+
+http://localhost:8080
+
+You should see our cybersecurity project website.
+
+The website is only accessible from the computer running Docker.
+
+## 4. Checking That Everything Works
+
+To see which containers are running:
+
+powershell
+  docker compose ps
+
+
+We should see three containers:
+
+- `web1` — First web server
+- `web2` — Second web server
+- `nginx` — Load balancer
+
+Refresh the website a few times.
+
+The page should switch between **Web Server 1** and **Web Server 2**, showing that Nginx is distributing requests between both servers.
+
+## 5. Presentation Commands
+
+These are some commands we can use during our presentation to demonstrate how the system works.
+
+### Demo 1 — Normal Operation
+
+Start everything:
+
+powershell
+  docker compose up -d --build
+
+
+Open http://localhost:8080 and refresh several times.
+
+**What to explain:**
+
+"We have two web servers running the same application. Nginx acts as our load balancer and distributes incoming requests between them."
+
+### Demo 2 — Simulate a Server Failure
+
+Stop the first web server:
+
+powershell
+  docker compose stop web1
+
+
+Refresh the website.
+
+It should continue working through Web Server 2. The first request might briefly fail while Nginx detects the unavailable server.
+
+**What to explain:**
+
+"We've simulated a server failure by shutting down Web Server 1. Since we have a second server available, the load balancer can continue directing requests to the working server."
+
+### Demo 3 — Restore the Failed Server
+
+Restart Web Server 1:
+
+powershell
+  docker compose start web1
+
+
+Wait a few seconds, then refresh the website several times.
+
+Both servers should begin handling requests again.
+
+**What to explain:**
+
+"After restoring the failed server, it can rejoin the load balancing process and begin handling requests again."
+
+### Demo 4 — Check Server Status
+
+Run:
+
+powershell
+  docker compose ps
+
+
+This shows which containers are currently running.
+
+We can run this before and after shutting down a server to show the difference.
+
+### Demo 5 — View Server Logs
+
+To view activity from the load balancer:
+
+powershell
+  docker compose logs nginx
+
+
+To view recent logs from both web servers:
+
+powershell
+  docker compose logs --tail=20 web1 web2
+
+
+**What to explain:**
+
+"Logs help us monitor what is happening with our servers and troubleshoot problems when something goes wrong."
+
+### Demo 6 — Complete Service Failure (Optional)
+
+Stop both web servers:
+
+powershell
+  docker compose stop web1 web2
+
+
+Try refreshing the website.
+
+The load balancer will no longer have a working server available, so the website should return an error.
+
+Restart both servers:
+
+powershell
+  docker compose start web1 web2
+
+
+**What to explain:**
+
+"This demonstrates a limitation of our system. We can handle the failure of one web server, but if both become unavailable, the service goes down."
+
+## 6. Stopping the Project
+
+When we're finished, we can double-click:
+
+`Stop-Project.bat`
+
+Or run:
+
+powershell
+  docker compose down
+
+
+This stops and removes the project's containers and network.
+
+If we only want to stop the containers without removing them, we can use:
+
+powershell
+  docker compose stop
+
+
+## Additional Notes
+
+This is just our starting setup for the project. As we add automated backups, DDoS protection, and monitoring, we can update this guide with additional commands and demonstrations.
+
+For now, the main focus is getting the two web servers and load balancer working correctly so everyone has a functional starting point.
+
+Feel free to update this document if you find an easier way to do something or run into any issues!
